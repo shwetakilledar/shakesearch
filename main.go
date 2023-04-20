@@ -9,7 +9,12 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"regexp"
+
+	"github.com/client9/misspell"
 )
+
+const ResultLength = 250
 
 func main() {
 	searcher := Searcher{}
@@ -48,9 +53,27 @@ func handleSearch(searcher Searcher) func(w http.ResponseWriter, r *http.Request
 			w.Write([]byte("missing search query in URL params"))
 			return
 		}
-		results := searcher.Search(query[0])
+
 		buf := &bytes.Buffer{}
 		enc := json.NewEncoder(buf)
+
+		checker := misspell.New()
+		q := query[0]
+		corrected, diff := checker.Replace(q)
+
+
+		if len(diff) >0 {
+			q = corrected
+			w.Header().Set("Content-Type", "application/json")
+			json.NewEncoder(w).Encode(struct {
+        Data string `json:"data"`
+      }{
+        Data: q,
+      })
+			return
+		}
+
+		results := searcher.Search(q)
 		err := enc.Encode(results)
 		if err != nil {
 			w.WriteHeader(http.StatusInternalServerError)
@@ -58,7 +81,12 @@ func handleSearch(searcher Searcher) func(w http.ResponseWriter, r *http.Request
 			return
 		}
 		w.Header().Set("Content-Type", "application/json")
-		w.Write(buf.Bytes())
+		json.NewEncoder(w).Encode(struct {
+			Data []string `json:"data"`
+		}{
+			Data: results,
+		})
+		return
 	}
 }
 
@@ -73,10 +101,30 @@ func (s *Searcher) Load(filename string) error {
 }
 
 func (s *Searcher) Search(query string) []string {
-	idxs := s.SuffixArray.Lookup([]byte(query), -1)
+	var re = regexp.MustCompile(query)
+	res := s.SuffixArray.FindAllIndex(re, -1)
 	results := []string{}
-	for _, idx := range idxs {
-		results = append(results, s.CompleteWorks[idx-250:idx+250])
+
+	for _, pair := range res {
+		wordStartsAt := pair[0]
+		wordEndsAt := pair[1]
+
+		// Index of starting position of word search
+		startPos := wordStartsAt - ResultLength
+		endPos := wordStartsAt + ResultLength
+
+		// Update start position if word is the frist word in the document
+		if startPos <= ResultLength {
+			startPos= wordStartsAt
+		}
+
+		// Update end position if word is the last word in the document
+		if endPos >= len(s.CompleteWorks) {
+			endPos= wordEndsAt
+		}
+
+		results = append(results, s.CompleteWorks[startPos:endPos])
 	}
+
 	return results
 }
