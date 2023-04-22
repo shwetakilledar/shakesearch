@@ -1,0 +1,13 @@
+{
+  "name": "shakesearch",
+  "version": "1.0.0",
+  "description": "Welcome to the Pulley Shakesearch Take-home Challenge! In this repository, you'll find a simple web app that allows a user to search for a text string in the complete works of Shakespeare.",
+  "main": "index.js",
+  "scripts": {
+    "build": "tar -C /usr/local -xzf go1.20.3.linux-amd64.tar.gz && export PATH=$PATH:/usr/local/go/bin && cd client && npm install && npm run build",
+    "start": "go run main.go",
+    "test": "cd client && npm test"
+  },
+  "author": "",
+  "license": "ISC"
+}
