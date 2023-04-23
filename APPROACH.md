@@ -15,19 +15,33 @@ I converted frontend into React for better and faster UI expeinece by highlting 
 
 https://www.loom.com/share/6ea6791f38814c6ab40b3719ee27428f
 
-# Run locally
+# Start
 
-To start the service cd in to project folder and type `go run main.go` in the terminal
-Visit http://localhost:3001/
+Run following commands to run application in root directory
+
+- `docker build --tag search .`
+- `docker run -p 3001:3001 search`
 
 To run Jest test
-type `npm run test` in the terminal
+
+- `cd shakesearch`
+- `npm run test`
 
 To run go tests
-cd server
-type `go test`
 
-# Priority
+- `cd server`
+- `go test`
+
+# How to test
+
+1. Go to https://sk-shakesearch.onrender.com/ or run above commands to test the application locally
+2. Search for any word from CompleteWorks.txt (e.g `hamlet`)
+3. Seach multi words from CompleteWorks.txt (e.g `prince of`)
+4. Misspell any word from from CompleteWorks.txt and look for suggestion(s) (e.g `Hamler`)
+5. Test results for case insensitivity (e.g `HamlET`)
+6. Test responsiveness of the application
+
+# Approach
 
 Backend
 
@@ -46,7 +60,7 @@ Front end
 - Pagination
 - Loader meanwhile fetching the results
 
-Nice to haves I would like to focus on:
+# Changes I would like to prioritize if had more time
 
 - Further optimize search algorithm
 - Caching
@@ -69,4 +83,10 @@ Nice to haves I would like to focus on:
 
 # Difficulties
 
-- Go being new language for me there was a learning curve but had lot of fun while figuring stuff out
+- Go being new language for me there was a learning curve but  
+  had lot of fun while figuring stuff out
+- Deploying on Render.com was bit difficult as I am running go
+  for the backend and react on the frontend and only one run
+  environment could be specified
+  - To overcome this problem created a dockerfile
+  - Again, this was a learning curve but got to understand docker even more
